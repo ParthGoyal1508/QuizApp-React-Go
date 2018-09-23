@@ -8,7 +8,7 @@ class Signup extends Component {
       formData: {
         emailid: "",
         phone: "",
-        userame: "",
+        username: "",
         password: "",
         city: "",
       },

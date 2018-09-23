@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import Home from './Home';
 import Signup from './/Signup';
 import Login from './Login';
+import ViewUsers from './ViewUsers';
 
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 
@@ -19,6 +20,7 @@ class App extends Component {
                 <ul className="nav navbar-nav">
                   <li><Link to={'/'}>Home</Link></li>
                   <li><Link to={'/login'}>Signup/Login</Link></li>
+                  <li><Link to={'/users'}>View Users</Link></li>
                 </ul>
               </div>
             </nav>
@@ -26,6 +28,7 @@ class App extends Component {
                  <Route exact path='/' component={Home} />
                  <Route exact path='/login' component={Login} />
                  <Route exact path='/signup' component={Signup} />
+                 <Route exact path='/users' component={ViewUsers} />
             </Switch>
           </div>
         </Router>

@@ -1,25 +1,20 @@
 import React, { Component } from 'react';
 
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
+
 class Quiz extends Component {
   constructor() {
     super();
     this.state = {
       formData: {
-        emailid: "",
-        phone: "",
-        userame: "",
-        password: "",
-        city: "",
+        name: "",
+        genre: "",
       },
       submitted: false,
       error : null,
     }
-    this.handleEChange = this.handleEChange.bind(this);
-    this.handleMChange = this.handleMChange.bind(this);
-    this.handleUChange = this.handleUChange.bind(this);
-    this.handlePChange = this.handlePChange.bind(this);
-    this.handleCChange = this.handleCChange.bind(this);
+    this.handleNChange = this.handleNChange.bind(this);
+    this.handleGChange = this.handleGChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
@@ -37,20 +32,11 @@ class Quiz extends Component {
         }
       });
   }
-  handleEChange(event) {
-    this.state.formData.emailid = event.target.value;
+  handleNChange(event) {
+    this.state.formData.name = event.target.value;
   }
-  handleMChange(event) {
-    this.state.formData.phone = event.target.value;
-  }
-  handleUChange(event) {
-    this.state.formData.username = event.target.value;
-  }
-  handlePChange(event) {
-    this.state.formData.password = event.target.value;
-  }
-  handleCChange(event) {
-    this.state.formData.city = event.target.value;
+  handleGChange(event) {
+    this.state.formData.genre = event.target.value;
   }
 
   render() {
@@ -58,32 +44,20 @@ class Quiz extends Component {
     return (
       <div className="App">
         <header className="App-header">
-          <h1 className="App-title">Sign Up</h1>
+          <h1 className="App-title">Create Quiz</h1>
         </header>
         <br/><br/>
         <div className="formContainer">
           <form onSubmit={this.handleSubmit}>
             <div className="form-group">
-                <label>Email ID</label>
-                <input type="emailid" className="form-control" value={this.state.emailid} onChange={this.handleEChange}/>
+                <label>Enter Quiz Name :</label>
+                <input type="emailid" className="form-control" value={this.state.name} onChange={this.handleNChange}/>
             </div>
             <div className="form-group">
-                <label>Phone</label>
-                <input type="number" className="form-control" value={this.state.phone} onChange={this.handleMChange}/>
+                <label>Enter Quiz Genre :</label>
+                <input type="number" className="form-control" value={this.state.genre} onChange={this.handleGChange}/>
             </div>
-            <div className="form-group">
-                <label>Username</label>
-                <input type="text" className="form-control" value={this.state.userame} onChange={this.handleUChange}/>
-            </div>
-            <div className="form-group">
-                <label>Password</label>
-                <input type="password" className="form-control" value={this.state.password} onChange={this.handlePChange}/>
-            </div>
-            <div className="form-group">
-                <label>City</label>
-                <input type="text" className="form-control" value={this.state.city} onChange={this.handleCChange}/>
-            </div>
-            <button type="submit" className="btn btn-default">Submit</button>
+            <button type="submit" className="btn btn-default">Add Questions</button>
           </form>
         </div>
 
