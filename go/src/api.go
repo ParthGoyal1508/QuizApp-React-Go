@@ -6,6 +6,7 @@ import (
 	"github.com/gin-contrib/cors" // Why do we need this package?
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	"github.com/gorilla/sessions"
 	_ "github.com/jinzhu/gorm/dialects/sqlite" // If you want to use mysql or any other db, replace this line
 )
 
@@ -21,7 +22,13 @@ type User struct {
 	City     string `json:"city"`
 }
 
-// var store = sessions.NewCookieStore([]byte("secret"))
+type Quiz struct {
+	ID		uint	`json:"id"`
+	Genre	string	`json:"genre"`
+
+}
+
+var store = sessions.NewCookieStore([]byte("secret-password"))
 
 func main() {
 	db, err = gorm.Open("sqlite3", "./gorm.db")
@@ -32,8 +39,8 @@ func main() {
 
 	db.AutoMigrate(&User{})
 	r := gin.Default()
-	r.POST("/user", CreateUser)
-	r.POST("/user/login", Login)
+	r.POST("/signup", CreateUser)
+	r.POST("/login", Login)
 	r.Use((cors.Default()))
 	r.Run(":8080") // Run on port 8080
 }
@@ -51,11 +58,11 @@ func main() {
 // }
 
 func Login(c *gin.Context) {
-	// session, _ := store.Get(c.Request, "cookie-name")
 	var user User
 	var users User
 	c.BindJSON(&user)
-	c.Header("access-control-allow-origin", "*") // Why am I doing this? Find out. Try running with this line commented
+	c.Header("access-control-allow-origin", "http://localhost:3000") // Why am I doing this? Find out. Try running with this line commented
+	c.Header("access-control-allow-credentials", "true") // Why am I doing this? Find out. Try running with this line commented
 	if user.Username == "" || user.Password == "" {
 		c.JSON(404, gin.H{"error": "Fields can't be empty"})
 	} else if err := db.Where("username = ? AND password = ?", user.Username, user.Password).First(&users).Error; err != nil {
@@ -63,8 +70,9 @@ func Login(c *gin.Context) {
 		c.JSON(404, gin.H{"error": "Incorrect Username or Password"})
 	} else {
 		fmt.Println("USER EXISTS")
-		// session.Values["authenticated"] = true
-		// session.Save(c.Request, c.Writer)
+		session, _ := store.Get(c.Request, "session-name")
+		session.Values["authenticated"] = true
+		session.Save(c.Request, c.Writer)
 		c.JSON(200, user)
 	}
 }
@@ -96,6 +104,7 @@ func CreateUser(c *gin.Context) {
 	c.Header("access-control-allow-origin", "*") // Why am I doing this? Find out. Try running with this line commented
 	if user.Username == "" || user.Password == "" || user.Phone == "" || user.EmailID == "" || user.City == "" {
 		c.JSON(404, gin.H{"error": "Fields can't be empty"})
+		fmt.Println("Fields Empty")
 	} else if err := db.Where("username = ?", user.Username).Or("phone=?", user.Phone).First(&users).Error; err == nil {
 		fmt.Println(err)
 		c.JSON(404, gin.H{"error": "User already exists"})
