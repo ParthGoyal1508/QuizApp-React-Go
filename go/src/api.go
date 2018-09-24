@@ -30,9 +30,9 @@ type Quiz struct {
 
 type Question struct {
 	ID		uint	`json:"id"`
-	QuizID	int		`json:"quizid"`
+	QuizID	int		`json:"quizid,string"`
 	Name	string	`json:"name"`
-	Type	string	`json:"type"`
+	Type	int		`json:"type"`
 	OptA	string	`json:"opta"`
 	OptB	string	`json:"optb"`
 	OptC	string	`json:"optc"`
@@ -51,16 +51,26 @@ func main() {
 		fmt.Println(err)
 	}
 	defer db.Close()
+	db.LogMode(true)
 
 	db.AutoMigrate(&User{})
 	db.AutoMigrate(&Quiz{})
+	db.AutoMigrate(&Question{})
 	r := gin.Default()
-	r.POST("/signup", CreateUser)
+
 	r.POST("/login", Login)
+	r.POST("/signup", CreateUser)
 	r.GET("/users/", GetUsers)
 	r.DELETE("/users/:id", DeleteUser)
+
+	r.POST("/makequiz",CreateQuiz)
+	r.GET("/quiz/", GetQuiz)
+	r.DELETE("/quiz/:id", DeleteQuiz)
+
 	r.POST("/addques", CreateQuestion)
-	r.POST("/quiz",CreateQuiz)
+	r.GET("/question/:qid", GetQuestion)
+	r.DELETE("/delques/:id", DeleteQuestion)
+
 	r.Use((cors.Default()))
 	r.Run(":8080") // Run on port 8080
 }
@@ -168,23 +178,6 @@ func DeleteUser(c *gin.Context) {
 // 	}
 // }
 
-
-
-func CreateQuestion(c *gin.Context) {
-	var ques Question
-	c.BindJSON(&ques)
-	fmt.Println(ques)
-	c.Header("access-control-allow-origin", "*") // Why am I doing this? Find out. Try running with this line commented
-	if ques.Name == "" || ques.OptA == "" || ques.OptB == "" || ques.OptC == "" || ques.OptD == ""  {
-		c.JSON(404, gin.H{"error": "Fields can't be empty"})
-		fmt.Println("Fields Empty")
-	} else {
-		fmt.Println(err)
-		db.Create(&ques)
-		c.JSON(200, ques)
-	}
-}
-
 func CreateQuiz(c *gin.Context) {
 	var quiz Quiz
 	var quizzes Quiz
@@ -202,4 +195,71 @@ func CreateQuiz(c *gin.Context) {
 		db.Create(&quiz)
 		c.JSON(200, quiz)
 	}
+}
+
+func GetQuiz(c *gin.Context) {
+	var quiz []Quiz
+	if err := db.Find(&quiz).Error; err != nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	} else {
+		c.Header("access-control-allow-origin", "*") // Why am I doing this? Find out. Try running with this line commented
+		c.JSON(200, quiz)
+	}
+}
+
+func DeleteQuiz(c *gin.Context) {
+	fmt.Println("WORKING")
+	id := c.Params.ByName("id")
+	var quiz Quiz
+	d := db.Where("id = ?", id).Delete(&quiz)
+	fmt.Println(d)
+	c.Header("access-control-allow-origin", "*")
+	c.JSON(200, gin.H{"id #" + id: "deleted"})
+}
+
+func CreateQuestion(c *gin.Context) {
+	var ques Question
+	c.BindJSON(&ques)
+	fmt.Println(ques)
+
+	if (ques.ValA+ques.ValB+ques.ValC+ques.ValD) > 1{
+		ques.Type=1
+	}
+	c.Header("access-control-allow-origin", "*") // Why am I doing this? Find out. Try running with this line commented
+	if ques.Name == "" || ques.OptA == "" || ques.OptB == "" || ques.OptC == "" || ques.OptD == "" {
+		c.JSON(400, gin.H{"error": "Fields can't be empty"})
+		fmt.Println("Fields Empty")
+	} else if ((ques.ValA+ques.ValB+ques.ValC+ques.ValD)==0){
+		c.JSON(400, gin.H{"error": "Atleast one option should be true"})
+		fmt.Println("Atleast one answer to be selected")
+	}else {
+		fmt.Println(err)
+		db.Create(&ques)
+		c.Header("access-control-allow-origin", "*") // Why am I doing this? Find out. Try running with this line commented
+		c.JSON(200, ques)
+	}
+}
+
+func GetQuestion(c *gin.Context) {
+	var question []Question
+	id := c.Params.ByName("qid")
+	if err := db.Where("quiz_id = ?",id).Find(&question).Error; err != nil {
+		fmt.Println("YOYO")
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	} else {
+		c.Header("access-control-allow-origin", "*") // Why am I doing this? Find out. Try running with this line commented
+		c.JSON(200, question)
+	}
+}
+
+func DeleteQuestion(c *gin.Context) {
+	fmt.Println("WORKING")
+	id := c.Params.ByName("id")
+	var question Question
+	d := db.Where("id = ?", id).Delete(&question)
+	fmt.Println(d)
+	c.Header("access-control-allow-origin", "*")
+	c.JSON(200, gin.H{"id #" + id: "deleted"})
 }

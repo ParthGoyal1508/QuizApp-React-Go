@@ -1,14 +1,14 @@
 import React, { Component } from 'react';
-
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
-class Questions extends Component {
+
+class CreateQuestion extends Component {
   constructor() {
     super();
     this.state = {
       formData: {
-        quizid: "",
+        quizid: 0,
         name: "",
-        type: "",
+        type: 0,
         opta: "",
         optb: "",
         optc: "",
@@ -35,6 +35,9 @@ class Questions extends Component {
 
   handleSubmit (event) {
     event.preventDefault();
+    var qid = this.props.match.params.id;
+    this.state.formData.quizid = qid;
+    console.log(this.state.formData);
     fetch('http://localhost:8080/addques', {
      method: 'POST',
      body: JSON.stringify(this.state.formData),
@@ -63,16 +66,16 @@ class Questions extends Component {
     this.state.formData.optd = event.target.value;
   }
   handleVAChange(event) {
-    this.state.formData.vala = 1;
+    this.state.formData.vala = (this.state.formData.vala+1)%2;
   }
   handleVBChange(event) {
-    this.state.formData.valb = 1;
+    this.state.formData.valb = (this.state.formData.valb+1)%2;
   }
   handleVCChange(event) {
-    this.state.formData.valc = 1;
+    this.state.formData.valc = (this.state.formData.valc+1)%2;
   }
   handleVDChange(event) {
-    this.state.formData.vald = 1;
+    this.state.formData.vald = (this.state.formData.vald+1)%2;
   }
 
   render() {
@@ -108,23 +111,23 @@ class Questions extends Component {
 
             <h>Solution:</h><br></br>
             <div>
-              <label>Option A</label>
-              <input type="radio" className="form-control" onClick={this.handleVAChange}/>
+              <label>A</label>
+              <input type="checkbox" className="form-control" onClick={this.handleVAChange}/>
             </div>
             <div>
-              <label>Option B</label>
-              <input type="radio" className="form-control" onClick={this.handleVBChange}/>
+              <label>B</label>
+              <input type="checkbox" className="form-control" onClick={this.handleVBChange}/>
             </div>
             <div>
-              <label>Option C</label>
-              <input type="radio" className="form-control" onClick={this.handleVCChange}/>
+              <label>C</label>
+              <input type="checkbox" className="form-control" onClick={this.handleVCChange}/>
             </div>
             <div>
-              <label>Option D</label>
-              <input type="radio" className="form-control" onClick={this.handleVDChange}/>
+              <label>D</label>
+              <input type="checkbox" className="form-control" onClick={this.handleVDChange}/>
             </div>
 
-            <button type="submit" className="btn btn-default">Submit</button>
+            <button type="submit" className="btn btn-default" onClick={this.handleSubmit}>Submit</button>
           </form>
         </div>
 
@@ -146,4 +149,4 @@ class Questions extends Component {
   }
 }
 
-export default Questions;
+export default CreateQuestion;
