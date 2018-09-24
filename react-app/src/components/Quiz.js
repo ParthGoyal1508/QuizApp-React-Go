@@ -20,7 +20,7 @@ class Quiz extends Component {
 
   handleSubmit (event) {
     event.preventDefault();
-    fetch('http://localhost:8080/signup', {
+    fetch('http://localhost:8080/quiz', {
      method: 'POST',
      body: JSON.stringify(this.state.formData),
    })
@@ -32,6 +32,7 @@ class Quiz extends Component {
         }
       });
   }
+
   handleNChange(event) {
     this.state.formData.name = event.target.value;
   }
@@ -55,16 +56,21 @@ class Quiz extends Component {
             </div>
             <div className="form-group">
                 <label>Enter Quiz Genre :</label>
-                <input type="number" className="form-control" value={this.state.genre} onChange={this.handleGChange}/>
+                <select value={this.state.genre} onChange={this.handleGChange}>
+                  <option value ="" selected=""> Select </option>
+                  <option value ="movies"> Movies </option>
+                  <option value ="sports"> Sports </option>
+                  <option value ="politics"> Politics </option>
+                </select>
             </div>
-            <button type="submit" className="btn btn-default">Add Questions</button>
+            <button type="submit" className="btn btn-default">Submit</button>
           </form>
         </div>
 
         {this.state.submitted &&
           <div>
             <h2>
-              New Account Created!
+              New Quiz Created!
             </h2>
              This has been printed using conditional rendering.
           </div>

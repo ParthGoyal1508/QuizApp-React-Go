@@ -53,12 +53,14 @@ func main() {
 	defer db.Close()
 
 	db.AutoMigrate(&User{})
+	db.AutoMigrate(&Quiz{})
 	r := gin.Default()
 	r.POST("/signup", CreateUser)
 	r.POST("/login", Login)
 	r.GET("/users/", GetUsers)
 	r.DELETE("/users/:id", DeleteUser)
 	r.POST("/addques", CreateQuestion)
+	r.POST("/quiz",CreateQuiz)
 	r.Use((cors.Default()))
 	r.Run(":8080") // Run on port 8080
 }
@@ -180,5 +182,24 @@ func CreateQuestion(c *gin.Context) {
 		fmt.Println(err)
 		db.Create(&ques)
 		c.JSON(200, ques)
+	}
+}
+
+func CreateQuiz(c *gin.Context) {
+	var quiz Quiz
+	var quizzes Quiz
+	c.BindJSON(&quiz)
+	fmt.Println(quiz)
+	c.Header("access-control-allow-origin", "*") // Why am I doing this? Find out. Try running with this line commented
+	if quiz.Name == "" || quiz.Genre == "" {
+		c.JSON(404, gin.H{"error": "Fields can't be empty"})
+		fmt.Println("Fields Empty")
+	} else if err := db.Where("name = ? AND genre=?", quiz.Name,quiz.Genre).First(&quizzes).Error; err == nil {
+		fmt.Println(err)
+		c.JSON(404, gin.H{"error": "Quiz already exists"})
+	}else {
+		fmt.Println(err)
+		db.Create(&quiz)
+		c.JSON(200, quiz)
 	}
 }
