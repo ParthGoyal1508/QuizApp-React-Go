@@ -2,14 +2,12 @@ import React, { Component } from 'react';
 
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 
-class CreateQuiz extends Component {
+class PlayQuiz extends Component {
   constructor() {
     super();
     this.state = {
-      formData: {
-        name: "",
-        genre: "",
-      },
+      data:[],
+      quizid: null,
       submitted: false,
       error : null,
     }
@@ -20,7 +18,8 @@ class CreateQuiz extends Component {
 
   handleSubmit (event) {
     event.preventDefault();
-    fetch('http://localhost:8080/makequiz', {
+    console.log(this.state);
+    fetch('http://localhost:8080/playquiz', {
      method: 'POST',
      body: JSON.stringify(this.state.formData),
    })
@@ -34,10 +33,16 @@ class CreateQuiz extends Component {
   }
 
   handleNChange(event) {
-    this.state.formData.name = event.target.value;
+    this.state.quizid = event.target.value;
   }
-  handleGChange(event) {
-    this.state.formData.genre = event.target.value;
+
+  handleGChange(event) {;
+    event.preventDefault();
+    const request = new Request('http://127.0.0.1:8080/genre/'+event.target.value);
+    fetch(request)
+      .then(response => response.json())
+        .then(data => this.setState({data:data}));
+    console.log(this.state.data);
   }
 
   render() {
@@ -51,16 +56,22 @@ class CreateQuiz extends Component {
         <div className="formContainer">
           <form onSubmit={this.handleSubmit}>
             <div className="form-group">
-                <label>Enter Quiz Name :</label>
-                <input type="text" className="form-control" value={this.state.name} onChange={this.handleNChange}/>
-            </div>
-            <div className="form-group">
                 <label>Enter Quiz Genre :</label>
                 <select value={this.state.genre} onChange={this.handleGChange}>
                   <option value ="" selected=""> Select </option>
                   <option value ="movies"> Movies </option>
                   <option value ="sports"> Sports </option>
                   <option value ="politics"> Politics </option>
+                </select>
+            </div>
+            <div className="form-group">
+                <label>Enter Quiz Name :</label>
+                <select value={this.state.name} onChange={this.handleNChange}>
+                  <option value ="" selected=""> Select </option>
+                  {this.state.data.map((item,key)=>{
+                    return(
+                    <option value ={item.id} > {item.name} </option>
+                  )})}
                 </select>
             </div>
             <button type="submit" className="btn btn-default">Submit</button>
@@ -85,4 +96,4 @@ class CreateQuiz extends Component {
   }
 }
 
-export default CreateQuiz;
+export default PlayQuiz;

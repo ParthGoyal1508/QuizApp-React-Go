@@ -7,6 +7,7 @@ import CreateQuiz from './CreateQuiz';
 import ViewQuiz from './ViewQuiz';
 import CreateQuestion from './CreateQuestion';
 import ViewQuestion from './ViewQuestion';
+import PlayQuiz from './PlayQuiz';
 
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 
@@ -27,6 +28,7 @@ class App extends Component {
                   <li><Link to={'/users'}>View Users</Link></li>
                   <li><Link to={'/makequiz'}>Create Quiz</Link></li>
                   <li><Link to={'/quiz'}>View Quizzes</Link></li>
+                  <li><Link to={'/playquiz'}>Play Quiz</Link></li>
                 </ul>
               </div>
             </nav>
@@ -39,6 +41,7 @@ class App extends Component {
                  <Route exact path='/quiz' component={ViewQuiz} />
                  <Route exact path='/addques/:id' component={CreateQuestion} />
                  <Route exact path='/question/:id' component={ViewQuestion} />
+                 <Route exact path='/playquiz' component={PlayQuiz} />
             </Switch>
           </div>
         </Router>

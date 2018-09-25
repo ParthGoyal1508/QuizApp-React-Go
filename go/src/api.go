@@ -71,6 +71,8 @@ func main() {
 	r.GET("/question/:qid", GetQuestion)
 	r.DELETE("/delques/:id", DeleteQuestion)
 
+	r.GET("/genre/:genre", GetQuizName)
+
 	r.Use((cors.Default()))
 	r.Run(":8080") // Run on port 8080
 }
@@ -262,4 +264,17 @@ func DeleteQuestion(c *gin.Context) {
 	fmt.Println(d)
 	c.Header("access-control-allow-origin", "*")
 	c.JSON(200, gin.H{"id #" + id: "deleted"})
+}
+
+func GetQuizName(c *gin.Context) {
+	var quiz []Quiz
+	genre := c.Params.ByName("genre")
+	if err := db.Where("genre = ?",genre).Find(&quiz).Error; err != nil {
+		fmt.Println("YOYO")
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	} else {
+		c.Header("access-control-allow-origin", "*") // Why am I doing this? Find out. Try running with this line commented
+		c.JSON(200, quiz)
+	}
 }
