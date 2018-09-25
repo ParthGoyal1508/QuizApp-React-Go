@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 
-class CreateQuestion extends Component {
+class EditQuestion extends Component {
   constructor() {
     super();
     this.state = {
@@ -37,19 +37,24 @@ class CreateQuestion extends Component {
     router: PropTypes.object,
   }
 
+  componentDidMount() {
+    var id = this.props.match.params.id;
+    const request = new Request('http://127.0.0.1:8080/ques/'+id);
+    fetch(request)
+      .then(response => response.json())
+        .then(data => this.setState({formData: data}));
+  }
+
   handleSubmit (event) {
     event.preventDefault();
-    var qid = this.props.match.params.id;
-    this.state.formData.quizid = qid;
+    var id = this.props.match.params.id;
     var sum = 0;
     sum+=(this.state.formData.vala == true)?1:0;
     sum+=(this.state.formData.valb == true)?1:0;
     sum+=(this.state.formData.valc == true)?1:0;
     sum+=(this.state.formData.vald == true)?1:0;
     this.state.formData.type = (sum>1)?1:0;
-
-    console.log(this.state.formData);
-    fetch('http://localhost:8080/addques', {
+    fetch('http://localhost:8080/editques/'+id, {
      method: 'POST',
      body: JSON.stringify(this.state.formData),
    })
@@ -57,8 +62,6 @@ class CreateQuestion extends Component {
         if(response.status >= 200 && response.status < 300)
           this.setState({submitted: true});
         else{
-          response.json()
-          .then(data=>this.setState({"error" : data.error}))
           this.setState({submitted:false});
         }
       });
@@ -153,7 +156,7 @@ class CreateQuestion extends Component {
           </form>
         </div>
 
-        {this.state.submitted && this.context.router.history.push("/question/"+this.props.match.params.id)}
+        {this.state.submitted && this.context.router.history.push("/question/"+this.state.formData.quizid)}
         {!this.state.submitted &&
           <div>
             {this.state.error}
@@ -164,4 +167,4 @@ class CreateQuestion extends Component {
   }
 }
 
-export default CreateQuestion;
+export default EditQuestion;

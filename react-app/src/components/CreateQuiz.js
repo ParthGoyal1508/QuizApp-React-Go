@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 
@@ -17,6 +18,9 @@ class CreateQuiz extends Component {
     this.handleGChange = this.handleGChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
+  static contextTypes={
+    router: PropTypes.object,
+  }
 
   handleSubmit (event) {
     event.preventDefault();
@@ -28,6 +32,8 @@ class CreateQuiz extends Component {
         if(response.status >= 200 && response.status < 300)
           this.setState({submitted: true});
         else{
+          response.json()
+          .then(data=>this.setState({"error" : data.error}))
           this.setState({submitted:false});
         }
       });
@@ -67,17 +73,10 @@ class CreateQuiz extends Component {
           </form>
         </div>
 
-        {this.state.submitted &&
-          <div>
-            <h2>
-              New Quiz Created!
-            </h2>
-             This has been printed using conditional rendering.
-          </div>
-        }
+        {this.state.submitted && this.context.router.history.push("/quiz")}
         {!this.state.submitted &&
           <div>
-            Error
+            {this.state.error}
           </div>
         }
       </div>

@@ -14,6 +14,7 @@ class PlayQuiz extends Component {
       index:0,
       score:0,
       submitted: false,
+      error: null,
     }
     this.handleVAChange = this.handleVAChange.bind(this);
     this.handleVBChange = this.handleVBChange.bind(this);
@@ -36,13 +37,19 @@ class PlayQuiz extends Component {
 
   submitQuestion(event,question){
     event.preventDefault();
-    this.setState({index:this.state.index+1});
-    if(this.state.checka === question.vala && this.state.checkb === question.valb && this.state.checkc === question.valc && this.state.checkd === question.vald){
-      this.setState({score:this.state.score+1});
-      console.log("CORRECT");
+    if(!(this.state.checka || this.state.checkb || this.state.checkc || this.state.checkd)){
+      this.setState({error: "Select atleast one Answer"});
     }
-    else{ console.log("INCORRECT");}
-    this.setState({checka:false,checkb:false,cheackc:false,cheackd:false});
+    else{
+      this.setState({error: null});
+      this.setState({index:this.state.index+1});
+      if(this.state.checka === question.vala && this.state.checkb === question.valb && this.state.checkc === question.valc && this.state.checkd === question.vald){
+       this.setState({score:this.state.score+1});
+       console.log("CORRECT");
+      }
+      else{ console.log("INCORRECT");}
+      this.setState({checka:false,checkb:false,cheackc:false,cheackd:false});
+    }
   }
 
   handleVAChange() {
@@ -96,6 +103,8 @@ class PlayQuiz extends Component {
           </div>
         </div>
         <input type="button" value='Submit' onClick={ (e)=>{this.submitQuestion(e,question) } } />
+        <br></br>
+        {this.state.error}
       </div>
       }
       {this.state.index >= this.state.data.length &&

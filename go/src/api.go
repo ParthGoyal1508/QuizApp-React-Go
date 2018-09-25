@@ -57,7 +57,6 @@ func main() {
 	db.AutoMigrate(&Quiz{})
 	db.AutoMigrate(&Question{})
 	r := gin.Default()
-
 	r.POST("/login", Login)
 	r.POST("/signup", CreateUser)
 	r.GET("/users/", GetUsers)
@@ -70,6 +69,8 @@ func main() {
 	r.POST("/addques", CreateQuestion)
 	r.GET("/question/:qid", GetQuestion)
 	r.DELETE("/delques/:id", DeleteQuestion)
+	r.POST("/editques/:id", EditQuestion)
+	r.GET("/ques/:id", GetQues)
 
 	r.GET("/genre/:genre", GetQuizName)
 
@@ -77,17 +78,17 @@ func main() {
 	r.Run(":8080") // Run on port 8080
 }
 
-// func Auth(c *gin.Context) {
-// 	session, _ := store.Get(c.Request, "cookie-name")
+func Auth(c *gin.Context) {
+	session, _ := store.Get(c.Request, "cookie-name")
 
-// 	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
-// 		http.Error(w, "Forbidden", http.StatusForbidden)
-// 		return
-// 	}
+	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 
-// 	// Print secret message
-// 	fmt.Fprintln(w, "The cake is a lie!")
-// }
+	// Print secret message
+	fmt.Fprintln(w, "The cake is a lie!")
+}
 
 func Login(c *gin.Context) {
 	var user User
@@ -118,7 +119,7 @@ func CreateUser(c *gin.Context) {
 	if user.Username == "" || user.Password == "" || user.Phone == "" || user.EmailID == "" || user.City == "" {
 		c.JSON(404, gin.H{"error": "Fields can't be empty"})
 		fmt.Println("Fields Empty")
-	} else if err := db.Where("username = ?", user.Username).Or("phone=?", user.Phone).First(&users).Error; err == nil {
+	} else if err := db.Where("username = ?", user.Username).Or("phone=?", user.Phone).Or("email_id=?", user.EmailID).First(&users).Error; err == nil {
 		fmt.Println(err)
 		c.JSON(404, gin.H{"error": "User already exists"})
 	} else {
@@ -149,36 +150,14 @@ func DeleteUser(c *gin.Context) {
 	c.JSON(200, gin.H{"id #" + id: "deleted"})
 }
 
-// func Logout(c *gin.Context) {
-// 	session, _ := store.Get(c.Request, "cookie-name")
-// 	session.Values["authenticated"] = false
-// 	session.Save(c.Request, c.Writer)
-// }
-
-// func UpdatePerson(c *gin.Context) {
-// 	var person Person
-// 	id := c.Params.ByName("id")
-// 	if err := db.Where("id = ?", id).First(&person).Error; err != nil {
-// 		c.AbortWithStatus(404)
-// 		fmt.Println(err)
-// 	}
-// 	c.BindJSON(&person)
-// 	db.Save(&person)
-// 	c.Header("access-control-allow-origin", "*") // Why am I doing this? Find out. Try running with this line commented
-// 	c.JSON(200, person)
-// }
-
-// func GetPerson(c *gin.Context) {
-// 	id := c.Params.ByName("id")
-// 	var person Person
-// 	if err := db.Where("id = ?", id).First(&person).Error; err != nil {
-// 		c.AbortWithStatus(404)
-// 		fmt.Println(err)
-// 	} else {
-// 		c.Header("access-control-allow-origin", "*") // Why am I doing this? Find out. Try running with this line commented
-// 		c.JSON(200, person)
-// 	}
-// }
+func Logout(c *gin.Context) {
+	session, _ := store.Get(c.Request, "cookie-name")
+	session.Values["authenticated"] = false
+	// session.Options = {
+	// 	maxAge : -1,
+	// }
+	session.Save(c.Request, c.Writer)
+}
 
 func CreateQuiz(c *gin.Context) {
 	var quiz Quiz
@@ -224,23 +203,6 @@ func CreateQuestion(c *gin.Context) {
 	var ques Question
 	c.BindJSON(&ques)
 	fmt.Println(ques)
-
-	sum:=0
-	if ques.ValA == true{
-		sum+=1
-	}
-	if ques.ValB == true{
-		sum+=1
-	}
-	if ques.ValC == true{
-		sum+=1
-	}
-	if ques.ValD == true{
-		sum+=1
-	}
-	if sum > 1 {
-		ques.Type=1
-	}
 	c.Header("access-control-allow-origin", "*") // Why am I doing this? Find out. Try running with this line commented
 	if ques.Name == "" || ques.OptA == "" || ques.OptB == "" || ques.OptC == "" || ques.OptD == "" {
 		c.JSON(400, gin.H{"error": "Fields can't be empty"})
@@ -253,6 +215,31 @@ func CreateQuestion(c *gin.Context) {
 		db.Create(&ques)
 		c.Header("access-control-allow-origin", "*") // Why am I doing this? Find out. Try running with this line commented
 		c.JSON(200, ques)
+	}
+}
+
+func EditQuestion(c *gin.Context) {
+	var question Question
+	id := c.Params.ByName("id")
+	if err := db.Where("id = ?", id).First(&question).Error; err != nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	}
+	c.BindJSON(&question)
+	db.Save(&question)
+	c.Header("access-control-allow-origin", "*") // Why am I doing this? Find out. Try running with this line commented
+	c.JSON(200, question)
+}
+
+func GetQues(c *gin.Context){
+	var question Question
+	id := c.Params.ByName("id")
+	if err := db.Where("id = ?", id).First(&question).Error; err != nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	} else {
+		c.Header("access-control-allow-origin", "*") // Why am I doing this? Find out. Try running with this line commented
+		c.JSON(200, question)
 	}
 }
 

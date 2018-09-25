@@ -22,8 +22,7 @@ class SelectQuiz extends Component {
 
   handleSubmit (event) {
     event.preventDefault();
-    var id = this.state.quizid;
-    this.context.router.history.push("/playquiz/"+id);
+    (this.state.quizid === null)?this.setState({error: "Select A Valid Quiz"}):this.setState({submitted: true});
   }
 
   handleNChange(event) {
@@ -72,17 +71,10 @@ class SelectQuiz extends Component {
           </form>
         </div>
 
-        {this.state.submitted &&
-          <div>
-            <h2>
-              New Quiz Created!
-            </h2>
-             This has been printed using conditional rendering.
-          </div>
-        }
+        {this.state.submitted && this.context.router.history.push("/playquiz/"+this.state.quizid)}
         {!this.state.submitted &&
           <div>
-            Error
+            {this.state.error}
           </div>
         }
       </div>

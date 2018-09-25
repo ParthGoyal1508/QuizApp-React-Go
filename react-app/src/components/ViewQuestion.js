@@ -37,7 +37,11 @@ class ViewQuestion extends Component {
   addQuestion(event,id){
     event.preventDefault();
     this.context.router.history.push("/addques/"+id);
-}
+  }
+  editQuestion(event,id){
+    event.preventDefault();
+    this.context.router.history.push("/editques/"+id);
+  }
 
   render() {
     console.log(this.state.data)
@@ -81,8 +85,7 @@ class ViewQuestion extends Component {
                       <td>{item.valb.toString()}</td>
                       <td>{item.valc.toString()}</td>
                       <td>{item.vald.toString()}</td>
-                      <td><input type="button" value='Edit'/></td>
-                       {/* onClick={(e)=>{this.deleteUser(e,item.id)}} /></td> */}
+                      <td><input type="button" value='Edit'onClick={(e)=>{this.editQuestion(e,item.id)}} /></td>
                       <td><input type="button" value='Delete' onClick={ (e)=>{ this.deleteQuestion(e,item.id) } } /></td>
                   </tr>
                 )

@@ -33,6 +33,8 @@ class Signup extends Component {
         if(response.status >= 200 && response.status < 300)
           this.setState({submitted: true});
         else{
+          response.json()
+          .then(data => this.setState({"error" : data.error}));
           this.setState({submitted:false});
         }
       });
@@ -97,7 +99,7 @@ class Signup extends Component {
         }
         {!this.state.submitted &&
           <div>
-            Error
+            {this.state.error}
           </div>
         }
       </div>
