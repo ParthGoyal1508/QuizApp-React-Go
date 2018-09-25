@@ -13,12 +13,6 @@ class PlayQuiz extends Component {
       data: [],
       index:0,
       score:0,
-      formData: {
-      vala:0,
-      valb:0,
-      valc:0,
-      vald:0,
-      },
       submitted: false,
     }
     this.handleVAChange = this.handleVAChange.bind(this);
@@ -43,29 +37,24 @@ class PlayQuiz extends Component {
   submitQuestion(event,question){
     event.preventDefault();
     this.setState({index:this.state.index+1});
-    if(this.state.formData.vala == question.vala && this.state.formData.valb == question.valb && this.state.formData.valc == question.valc && this.state.formData.vald == question.vald){
+    if(this.state.checka === question.vala && this.state.checkb === question.valb && this.state.checkc === question.valc && this.state.checkd === question.vald){
       this.setState({score:this.state.score+1});
       console.log("CORRECT");
     }
     else{ console.log("INCORRECT");}
     this.setState({checka:false,checkb:false,cheackc:false,cheackd:false});
-    this.setState({formData: {vala:0,valb:0,valc:0,vald:0}});
   }
 
   handleVAChange() {
-    this.state.formData.vala = (this.state.formData.vala+1)%2;
     this.setState({checka: !this.state.checka });
   }
   handleVBChange() {
-    this.state.formData.valb = (this.state.formData.valb+1)%2;
     this.setState({checkb: !this.state.checkb});
   }
   handleVCChange() {
-    this.state.formData.valc = (this.state.formData.valc+1)%2;
     this.setState({checkc: !this.state.checkc});
   }
   handleVDChange() {
-    this.state.formData.vald = (this.state.formData.vald+1)%2;
     this.setState({checkd: !this.state.checkd});
   }
   

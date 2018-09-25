@@ -40,6 +40,7 @@ class ViewQuestion extends Component {
 }
 
   render() {
+    console.log(this.state.data)
     return (
       <div className="App">
         <header className="App-header">
@@ -76,10 +77,10 @@ class ViewQuestion extends Component {
                       <td>{item.optb}</td>
                       <td>{item.optc}</td>
                       <td>{item.optd}</td>
-                      <td>{item.vala}</td>
-                      <td>{item.valb}</td>
-                      <td>{item.valc}</td>
-                      <td>{item.vald}</td>
+                      <td>{item.vala.toString()}</td>
+                      <td>{item.valb.toString()}</td>
+                      <td>{item.valc.toString()}</td>
+                      <td>{item.vald.toString()}</td>
                       <td><input type="button" value='Edit'/></td>
                        {/* onClick={(e)=>{this.deleteUser(e,item.id)}} /></td> */}
                       <td><input type="button" value='Delete' onClick={ (e)=>{ this.deleteQuestion(e,item.id) } } /></td>

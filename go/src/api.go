@@ -37,10 +37,10 @@ type Question struct {
 	OptB	string	`json:"optb"`
 	OptC	string	`json:"optc"`
 	OptD	string	`json:"optd"`
-	ValA	int		`json:"vala"`
-	ValB	int		`json:"valb"`
-	ValC	int		`json:"valc"`
-	ValD	int		`json:"vald"`
+	ValA	bool	`json:"vala"`
+	ValB	bool	`json:"valb"`
+	ValC	bool	`json:"valc"`
+	ValD	bool	`json:"vald"`
 }
 
 var store = sessions.NewCookieStore([]byte("secret-password"))
@@ -225,14 +225,27 @@ func CreateQuestion(c *gin.Context) {
 	c.BindJSON(&ques)
 	fmt.Println(ques)
 
-	if (ques.ValA+ques.ValB+ques.ValC+ques.ValD) > 1{
+	sum:=0
+	if ques.ValA == true{
+		sum+=1
+	}
+	if ques.ValB == true{
+		sum+=1
+	}
+	if ques.ValC == true{
+		sum+=1
+	}
+	if ques.ValD == true{
+		sum+=1
+	}
+	if sum > 1 {
 		ques.Type=1
 	}
 	c.Header("access-control-allow-origin", "*") // Why am I doing this? Find out. Try running with this line commented
 	if ques.Name == "" || ques.OptA == "" || ques.OptB == "" || ques.OptC == "" || ques.OptD == "" {
 		c.JSON(400, gin.H{"error": "Fields can't be empty"})
 		fmt.Println("Fields Empty")
-	} else if ((ques.ValA+ques.ValB+ques.ValC+ques.ValD)==0){
+	} else if (!(ques.ValA || ques.ValB || ques.ValC || ques.ValD)){
 		c.JSON(400, gin.H{"error": "Atleast one option should be true"})
 		fmt.Println("Atleast one answer to be selected")
 	}else {

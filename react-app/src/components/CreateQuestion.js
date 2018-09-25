@@ -13,10 +13,10 @@ class CreateQuestion extends Component {
         optb: "",
         optc: "",
         optd: "",
-        vala: 0,
-        valb: 0,
-        valc: 0,
-        vald: 0,
+        vala: false,
+        valb: false,
+        valc: false,
+        vald: false,
       },
       submitted: false,
       error : null,
@@ -66,16 +66,16 @@ class CreateQuestion extends Component {
     this.state.formData.optd = event.target.value;
   }
   handleVAChange(event) {
-    this.state.formData.vala = (this.state.formData.vala+1)%2;
+    this.state.formData.vala = (!this.state.formData.vala);
   }
   handleVBChange(event) {
-    this.state.formData.valb = (this.state.formData.valb+1)%2;
+    this.state.formData.valb = (!this.state.formData.valb);
   }
   handleVCChange(event) {
-    this.state.formData.valc = (this.state.formData.valc+1)%2;
+    this.state.formData.valc = (!this.state.formData.valc);
   }
   handleVDChange(event) {
-    this.state.formData.vald = (this.state.formData.vald+1)%2;
+    this.state.formData.vald = (!this.state.formData.vald);
   }
 
   render() {
