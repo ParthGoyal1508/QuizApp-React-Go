@@ -8,6 +8,7 @@ class ViewQuestion extends Component {
     this.state = {
       data: [],
       submitted: false,
+      loggedin : localStorage.getItem("username")
     }
   }
   static contextTypes={
@@ -47,6 +48,8 @@ class ViewQuestion extends Component {
     console.log(this.state.data)
     return (
       <div className="App">
+      {this.state.loggedin=="admin" &&
+      <div>
         <header className="App-header">
           <h1 className="App-title">All Questions</h1>
         </header>
@@ -94,6 +97,13 @@ class ViewQuestion extends Component {
        </table>
        <input type="button" value='Add Question' onClick={ (e)=>{ this.addQuestion(e,this.props.match.params.id) } } />
        {this.state.submitted && window.location.reload()}
+       </div>
+      }
+      { this.state.loggedin!="admin" &&
+      <div>
+        <h1>You must have Admin Access</h1>
+      </div>
+      }
       </div>
     );
   }

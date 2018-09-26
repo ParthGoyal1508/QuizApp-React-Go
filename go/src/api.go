@@ -22,10 +22,27 @@ type User struct {
 	City     string `json:"city"`
 }
 
+type Score struct {
+	ID		uint 	`json:"id"`
+	UserID	int		`json:"userid,string"`
+	Mscore	int		`json:"mscore" gorm:"default:0"`
+	Pscore	int		`json:"pscore" gorm:"default:0"`
+	Sscore	int		`json:"sscore" gorm:"default:0"`
+}
+
 type Quiz struct {
 	ID		uint	`json:"id"`
 	Genre	string	`json:"genre"`
 	Name	string	`json:"name"`
+}
+
+type Game struct {
+	ID 			uint	`json:"id"`
+	Username	string	`json:"username"`
+	QuizID		int		`json:"quizid,string"`
+	Quizname	string	`json:"quizname"`
+	Quizgenre	string	`json:"quizgenre"`
+	Score		int		`json:"score"`
 }
 
 type Question struct {
@@ -56,38 +73,56 @@ func main() {
 	db.AutoMigrate(&User{})
 	db.AutoMigrate(&Quiz{})
 	db.AutoMigrate(&Question{})
-	r := gin.Default()
+	db.AutoMigrate(&Score{})
+	db.AutoMigrate(&Game{})
+	r := gin.New()
+	v:=r.Group("")
+
 	r.POST("/login", Login)
 	r.POST("/signup", CreateUser)
-	r.GET("/users/", GetUsers)
-	r.DELETE("/users/:id", DeleteUser)
 
-	r.POST("/makequiz",CreateQuiz)
-	r.GET("/quiz/", GetQuiz)
-	r.DELETE("/quiz/:id", DeleteQuiz)
+	v.Use(Auth())
+	{
+		v.GET("/users/", GetUsers)
+		v.DELETE("/users/:id", DeleteUser)
 
-	r.POST("/addques", CreateQuestion)
-	r.GET("/question/:qid", GetQuestion)
-	r.DELETE("/delques/:id", DeleteQuestion)
-	r.POST("/editques/:id", EditQuestion)
-	r.GET("/ques/:id", GetQues)
+		v.POST("/makequiz",CreateQuiz)
+		v.GET("/quiz/", GetQuiz)
+		r.DELETE("/quiz/:id", DeleteQuiz)
 
-	r.GET("/genre/:genre", GetQuizName)
+		v.POST("/addques", CreateQuestion)
+		v.GET("/question/:qid", GetQuestion)
+		v.DELETE("/delques/:id", DeleteQuestion)
+		v.POST("/editques/:id", EditQuestion)
+		v.GET("/ques/:id", GetQues)
 
+		v.GET("/genre/:genre", GetQuizName)
+		v.GET("/quizid/:qid",GetQuizById)
+
+		v.GET("/score/:id",GetScore)
+		v.POST("/updatescore",UpdateScore)
+
+		v.GET("/games/:uname",GetGames)
+
+		v.GET("/leaderboard",Leaderboard)
+		v.GET("/sportsboard",Sportsboard)
+		v.GET("/moviesboard",Moviesboard)
+		v.GET("/politicsboard",Politicsboard)
+	}
 	r.Use((cors.Default()))
 	r.Run(":8080") // Run on port 8080
 }
 
-func Auth(c *gin.Context) {
-	session, _ := store.Get(c.Request, "cookie-name")
-
-	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
-		http.Error(w, "Forbidden", http.StatusForbidden)
-		return
+func Auth() gin.HandlerFunc{
+	return func(c *gin.Context){
+		session, _ := store.Get(c.Request, "session-name")
+		fmt.Println(session.Values["authenticated"])
+		if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+			fmt.Println("Fake User")
+		}
+	fmt.Println("User Authenticated")
+	c.Next()
 	}
-
-	// Print secret message
-	fmt.Fprintln(w, "The cake is a lie!")
 }
 
 func Login(c *gin.Context) {
@@ -106,6 +141,7 @@ func Login(c *gin.Context) {
 		session, _ := store.Get(c.Request, "session-name")
 		session.Values["authenticated"] = true
 		session.Save(c.Request, c.Writer)
+		fmt.Println(session.Values["authenticated"])
 		c.JSON(200, user)
 	}
 }
@@ -153,9 +189,6 @@ func DeleteUser(c *gin.Context) {
 func Logout(c *gin.Context) {
 	session, _ := store.Get(c.Request, "cookie-name")
 	session.Values["authenticated"] = false
-	// session.Options = {
-	// 	maxAge : -1,
-	// }
 	session.Save(c.Request, c.Writer)
 }
 
@@ -276,5 +309,96 @@ func GetQuizName(c *gin.Context) {
 	} else {
 		c.Header("access-control-allow-origin", "*") // Why am I doing this? Find out. Try running with this line commented
 		c.JSON(200, quiz)
+	}
+}
+
+func GetQuizById(c *gin.Context) {
+	var quiz Quiz
+	qid := c.Params.ByName("qid")
+	if err := db.Where("id = ?",qid).First(&quiz).Error; err != nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	} else {
+		fmt.Println(quiz)
+		c.Header("access-control-allow-origin", "*") // Why am I doing this? Find out. Try running with this line commented
+		c.JSON(200, quiz)
+	}
+}
+
+func GetScore(c *gin.Context){
+	var score Score
+	id := c.Params.ByName("id")
+	if err := db.Where("id = ?", id).First(&score).Error; err != nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	} else {
+		c.Header("access-control-allow-origin", "*") // Why am I doing this? Find out. Try running with this line commented
+		c.JSON(200, score)
+	}
+}
+
+func UpdateScore(c *gin.Context) {
+	var game Game
+	c.BindJSON(&game)
+	fmt.Println(game)
+	db.Create(&game)
+	c.Header("access-control-allow-origin", "*") // Why am I doing this? Find out. Try running with this line commented
+	c.JSON(200, game)
+}
+
+func GetGames(c *gin.Context){
+	var game []Game
+	uname := c.Params.ByName("uname")
+	if err := db.Where("username = ?", uname).Find(&game).Error; err != nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	} else {
+		fmt.Println(game)
+		c.Header("access-control-allow-origin", "*") // Why am I doing this? Find out. Try running with this line commented
+		c.JSON(200, game)
+	}
+}
+
+func Leaderboard(c *gin.Context){
+	var game []Game
+	if err := db.Order("score desc").Find(&game).Error; err !=nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	} else {
+		c.Header("access-control-allow-origin", "*") // Why am I doing this? Find out. Try running with this line commented
+		c.JSON(200, game)
+	}
+}
+
+func Sportsboard(c *gin.Context){
+	var game []Game
+	if err := db.Where("quizgenre = sports").Order("score desc").Find(&game).Error; err !=nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	} else {
+		c.Header("access-control-allow-origin", "*") // Why am I doing this? Find out. Try running with this line commented
+		c.JSON(200, game)
+	}
+}
+
+func Moviesboard(c *gin.Context){
+	var game []Game
+	if err := db.Where("quizgenre = movies").Order("score desc").Find(&game).Error; err !=nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	} else {
+		c.Header("access-control-allow-origin", "*") // Why am I doing this? Find out. Try running with this line commented
+		c.JSON(200, game)
+	}
+}
+
+func Politicsboard(c *gin.Context){
+	var game []Game
+	if err := db.Where("quizgenre = politics").Order("score desc").Find(&game).Error; err !=nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	} else {
+		c.Header("access-control-allow-origin", "*") // Why am I doing this? Find out. Try running with this line commented
+		c.JSON(200, game)
 	}
 }

@@ -11,6 +11,7 @@ class SelectQuiz extends Component {
       quizid: null,
       submitted: false,
       error : null,
+      loggedin : localStorage.getItem("username")
     }
     this.handleNChange = this.handleNChange.bind(this);
     this.handleGChange = this.handleGChange.bind(this);
@@ -42,6 +43,8 @@ class SelectQuiz extends Component {
 
     return (
       <div className="App">
+      {this.state.loggedin!=null &&
+      <div>
         <header className="App-header">
           <h1 className="App-title">Create Quiz</h1>
         </header>
@@ -77,6 +80,13 @@ class SelectQuiz extends Component {
             {this.state.error}
           </div>
         }
+        </div>
+      }
+      { this.state.loggedin==null &&
+      <div>
+        <h1>You must be logged in!</h1>
+      </div>
+      }
       </div>
     );
   }

@@ -21,6 +21,7 @@ class CreateQuestion extends Component {
       },
       submitted: false,
       error : null,
+      loggedin : localStorage.getItem("username")
     }
     this.handleNChange = this.handleNChange.bind(this);
     this.handleQAChange = this.handleQAChange.bind(this);
@@ -104,6 +105,8 @@ class CreateQuestion extends Component {
 
     return (
       <div className="App">
+      { this.state.loggedin=="admin" &&
+      <div>
         <header className="App-header">
           <h1 className="App-title">Sign Up</h1>
         </header>
@@ -152,13 +155,21 @@ class CreateQuestion extends Component {
             <button type="submit" className="btn btn-default" onClick={this.handleSubmit}>Submit</button>
           </form>
         </div>
-
+        <div>
         {this.state.submitted && this.context.router.history.push("/question/"+this.props.match.params.id)}
         {!this.state.submitted &&
           <div>
             {this.state.error}
           </div>
         }
+        </div>
+      </div>
+      }
+      { this.state.loggedin!="admin" &&
+      <div>
+        <h1>You must have Admin Access</h1>
+      </div>
+      }
       </div>
     );
   }

@@ -21,6 +21,7 @@ class EditQuestion extends Component {
       },
       submitted: false,
       error : null,
+      loggedin : localStorage.getItem("username")
     }
     this.handleNChange = this.handleNChange.bind(this);
     this.handleQAChange = this.handleQAChange.bind(this);
@@ -107,6 +108,8 @@ class EditQuestion extends Component {
 
     return (
       <div className="App">
+      {this.state.loggedin=="admin" &&
+      <div>
         <header className="App-header">
           <h1 className="App-title">Sign Up</h1>
         </header>
@@ -162,6 +165,13 @@ class EditQuestion extends Component {
             {this.state.error}
           </div>
         }
+        </div>
+      }
+      { this.state.loggedin!="admin" &&
+      <div>
+        <h1>You must have Admin Access</h1>
+      </div>
+      }
       </div>
     );
   }

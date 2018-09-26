@@ -11,6 +11,7 @@ class Login extends Component {
       },
       submitted: false,
       error : null,
+      loggedin : localStorage.getItem("username")
     }
     this.handleUChange = this.handleUChange.bind(this);
     this.handlePChange = this.handlePChange.bind(this);
@@ -25,9 +26,10 @@ class Login extends Component {
      credentials:'include'
    })
       .then(response => {
-        if(response.status >= 200 && response.status < 300)
-          this.setState({submitted: true});
-        else{
+        if(response.status >= 200 && response.status < 300){
+        this.setState({submitted: true});
+        localStorage.setItem("username",this.state.formData.username);
+        } else{
           response.json()
           .then(data => this.setState({"error" : data.error}));
           this.setState({submitted:false});
@@ -46,6 +48,8 @@ class Login extends Component {
 
     return (
       <div className="App">
+      {this.state.loggedin == null &&
+      <div>
         <header className="App-header">
           <h1 className="App-title">Create a New Person</h1>
         </header>
@@ -77,7 +81,13 @@ class Login extends Component {
             {this.state.error}
           </div>
         }
-
+        </div>
+      }
+      { this.state.loggedin!=null &&
+      <div>
+        <h1>You are already logged in!</h1>
+      </div>
+      }
       </div>
     );
   }

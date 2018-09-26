@@ -13,6 +13,7 @@ class CreateQuiz extends Component {
       },
       submitted: false,
       error : null,
+      loggedin : localStorage.getItem("username")
     }
     this.handleNChange = this.handleNChange.bind(this);
     this.handleGChange = this.handleGChange.bind(this);
@@ -50,6 +51,8 @@ class CreateQuiz extends Component {
 
     return (
       <div className="App">
+      {this.state.loggedin=="admin" &&
+      <div>
         <header className="App-header">
           <h1 className="App-title">Create Quiz</h1>
         </header>
@@ -79,6 +82,13 @@ class CreateQuiz extends Component {
             {this.state.error}
           </div>
         }
+      </div>
+      }
+      { this.state.loggedin!="admin" &&
+      <div>
+        <h1>You must have Admin Access</h1>
+      </div>
+      }
       </div>
     );
   }

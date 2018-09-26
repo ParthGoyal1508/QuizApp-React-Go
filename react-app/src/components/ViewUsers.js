@@ -7,6 +7,7 @@ class ViewUsers extends Component {
     this.state = {
       data: [],
       submitted: false,
+      loggedin : localStorage.getItem("username")
     }
   }
 
@@ -33,6 +34,8 @@ class ViewUsers extends Component {
   render() {
     return (
       <div className="App">
+      {this.state.loggedin=="admin" &&
+      <div>
         <header className="App-header">
           <h1 className="App-title">All Users</h1>
         </header>
@@ -65,6 +68,13 @@ class ViewUsers extends Component {
           </tbody>
        </table>
        {this.state.submitted && window.location.reload()}
+       </div>
+      }
+      { this.state.loggedin!="admin" &&
+      <div>
+        <h1>You must have Admin Access</h1>
+      </div>
+      }
       </div>
     );
   }
