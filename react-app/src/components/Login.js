@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { GoogleLogin } from 'react-google-login';
+// import { GoogleLogin } from 'react-google-login';
 
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 class Login extends Component {
@@ -99,7 +99,7 @@ class Login extends Component {
       }
       { this.state.loggedin!=null &&
       <div>
-        <h1>You are already logged in!</h1>
+        <h1>You are logged in!</h1>
       </div>
       }
       </div>

@@ -32,7 +32,7 @@ type Quiz struct {
 type Game struct {
 	ID 			uint	`json:"id"`
 	Username	string	`json:"username"`
-	QuizID		int		`sql:"type:bigint REFERENCES quizzes(ID) ON DELETE CASCADE ON UPDATE CASCADE";json:"quizid,string"`
+	QuizID		int		`json:"quizid,string"`
 	Quizname	string	`json:"quizname"`
 	Quizgenre	string	`json:"quizgenre"`
 	Score		int		`json:"score"`
@@ -40,7 +40,7 @@ type Game struct {
 
 type Question struct {
 	ID		uint	`json:"id"`
-	QuizID	int		`sql:"type:bigint REFERENCES quizzes(ID) ON DELETE CASCADE ON UPDATE CASCADE";json:"quizid,string"`
+	QuizID	int		`json:"quizid,string"`
 	Name	string	`json:"name"`
 	Type	int		`json:"type"`
 	OptA	string	`json:"opta"`
@@ -90,6 +90,7 @@ func main() {
 
 		v.GET("/genre/:genre", GetQuizName)
 		v.GET("/quizid/:qid",GetQuizById)
+		v.POST("/updatescore", UpdateScore)
 
 		v.GET("/games/:uname",GetGames)
 
