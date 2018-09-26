@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"github.com/gorilla/sessions"
+	"golang.org/x/crypto/bcrypt"
 	_ "github.com/jinzhu/gorm/dialects/sqlite" // If you want to use mysql or any other db, replace this line
 )
 
@@ -22,14 +23,6 @@ type User struct {
 	City     string `json:"city"`
 }
 
-type Score struct {
-	ID		uint 	`json:"id"`
-	UserID	int		`json:"userid,string"`
-	Mscore	int		`json:"mscore" gorm:"default:0"`
-	Pscore	int		`json:"pscore" gorm:"default:0"`
-	Sscore	int		`json:"sscore" gorm:"default:0"`
-}
-
 type Quiz struct {
 	ID		uint	`json:"id"`
 	Genre	string	`json:"genre"`
@@ -39,7 +32,7 @@ type Quiz struct {
 type Game struct {
 	ID 			uint	`json:"id"`
 	Username	string	`json:"username"`
-	QuizID		int		`json:"quizid,string"`
+	QuizID		int		`sql:"type:bigint REFERENCES quizzes(ID) ON DELETE CASCADE ON UPDATE CASCADE";json:"quizid,string"`
 	Quizname	string	`json:"quizname"`
 	Quizgenre	string	`json:"quizgenre"`
 	Score		int		`json:"score"`
@@ -47,7 +40,7 @@ type Game struct {
 
 type Question struct {
 	ID		uint	`json:"id"`
-	QuizID	int		`json:"quizid,string"`
+	QuizID	int		`sql:"type:bigint REFERENCES quizzes(ID) ON DELETE CASCADE ON UPDATE CASCADE";json:"quizid,string"`
 	Name	string	`json:"name"`
 	Type	int		`json:"type"`
 	OptA	string	`json:"opta"`
@@ -69,11 +62,10 @@ func main() {
 	}
 	defer db.Close()
 	db.LogMode(true)
-
+	db.Exec("PRAGMA foreign_keys = ON")
 	db.AutoMigrate(&User{})
 	db.AutoMigrate(&Quiz{})
 	db.AutoMigrate(&Question{})
-	db.AutoMigrate(&Score{})
 	db.AutoMigrate(&Game{})
 	r := gin.New()
 	v:=r.Group("")
@@ -99,15 +91,10 @@ func main() {
 		v.GET("/genre/:genre", GetQuizName)
 		v.GET("/quizid/:qid",GetQuizById)
 
-		v.GET("/score/:id",GetScore)
-		v.POST("/updatescore",UpdateScore)
-
 		v.GET("/games/:uname",GetGames)
 
 		v.GET("/leaderboard",Leaderboard)
-		v.GET("/sportsboard",Sportsboard)
-		v.GET("/moviesboard",Moviesboard)
-		v.GET("/politicsboard",Politicsboard)
+		v.GET("/leaderboard/:genre",Genreboard)
 	}
 	r.Use((cors.Default()))
 	r.Run(":8080") // Run on port 8080
@@ -125,6 +112,16 @@ func Auth() gin.HandlerFunc{
 	}
 }
 
+func HashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	return string(bytes), err
+}
+
+func CheckPasswordHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
+}
+
 func Login(c *gin.Context) {
 	var user User
 	var users User
@@ -133,16 +130,21 @@ func Login(c *gin.Context) {
 	c.Header("access-control-allow-credentials", "true") // Why am I doing this? Find out. Try running with this line commented
 	if user.Username == "" || user.Password == "" {
 		c.JSON(404, gin.H{"error": "Fields can't be empty"})
-	} else if err := db.Where("username = ? AND password = ?", user.Username, user.Password).First(&users).Error; err != nil {
+	} else if err := db.Where("username = ?", user.Username).First(&users).Error; err != nil {
 		fmt.Println(err)
 		c.JSON(404, gin.H{"error": "Incorrect Username or Password"})
 	} else {
-		fmt.Println("USER EXISTS")
-		session, _ := store.Get(c.Request, "session-name")
-		session.Values["authenticated"] = true
-		session.Save(c.Request, c.Writer)
-		fmt.Println(session.Values["authenticated"])
-		c.JSON(200, user)
+		match:=CheckPasswordHash(user.Password,users.Password)
+		if match == true {
+			fmt.Println("USER EXISTS")
+			session, _ := store.Get(c.Request, "session-name")
+			session.Values["authenticated"] = true
+			session.Save(c.Request, c.Writer)
+			fmt.Println(session.Values["authenticated"])
+			c.JSON(200, user)
+		} else {
+			c.JSON(404, gin.H{"error": "Incorrect Username or Password"})
+		}
 	}
 }
 
@@ -159,6 +161,8 @@ func CreateUser(c *gin.Context) {
 		fmt.Println(err)
 		c.JSON(404, gin.H{"error": "User already exists"})
 	} else {
+		hashpass,_ := HashPassword(user.Password)
+		user.Password = hashpass
 		fmt.Println(err)
 		db.Create(&user)
 		c.JSON(200, user)
@@ -325,18 +329,6 @@ func GetQuizById(c *gin.Context) {
 	}
 }
 
-func GetScore(c *gin.Context){
-	var score Score
-	id := c.Params.ByName("id")
-	if err := db.Where("id = ?", id).First(&score).Error; err != nil {
-		c.AbortWithStatus(404)
-		fmt.Println(err)
-	} else {
-		c.Header("access-control-allow-origin", "*") // Why am I doing this? Find out. Try running with this line commented
-		c.JSON(200, score)
-	}
-}
-
 func UpdateScore(c *gin.Context) {
 	var game Game
 	c.BindJSON(&game)
@@ -370,31 +362,10 @@ func Leaderboard(c *gin.Context){
 	}
 }
 
-func Sportsboard(c *gin.Context){
+func Genreboard(c *gin.Context){
 	var game []Game
-	if err := db.Where("quizgenre = sports").Order("score desc").Find(&game).Error; err !=nil {
-		c.AbortWithStatus(404)
-		fmt.Println(err)
-	} else {
-		c.Header("access-control-allow-origin", "*") // Why am I doing this? Find out. Try running with this line commented
-		c.JSON(200, game)
-	}
-}
-
-func Moviesboard(c *gin.Context){
-	var game []Game
-	if err := db.Where("quizgenre = movies").Order("score desc").Find(&game).Error; err !=nil {
-		c.AbortWithStatus(404)
-		fmt.Println(err)
-	} else {
-		c.Header("access-control-allow-origin", "*") // Why am I doing this? Find out. Try running with this line commented
-		c.JSON(200, game)
-	}
-}
-
-func Politicsboard(c *gin.Context){
-	var game []Game
-	if err := db.Where("quizgenre = politics").Order("score desc").Find(&game).Error; err !=nil {
+	genre := c.Params.ByName("genre")
+	if err := db.Where("quizgenre = ?",genre).Order("score desc").Find(&game).Error; err !=nil {
 		c.AbortWithStatus(404)
 		fmt.Println(err)
 	} else {

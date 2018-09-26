@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import { GoogleLogin } from 'react-google-login';
 
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 class Login extends Component {
@@ -16,6 +18,9 @@ class Login extends Component {
     this.handleUChange = this.handleUChange.bind(this);
     this.handlePChange = this.handlePChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+  }
+  static contextTypes={
+    router: PropTypes.object,
   }
 
   handleSubmit (event) {
@@ -43,7 +48,10 @@ class Login extends Component {
   handlePChange(event) {
     this.state.formData.password = event.target.value;
   }
-
+  // Google = (response) => {
+  //   console.log(response);
+  // }
+   
   render() {
 
     return (
@@ -54,7 +62,13 @@ class Login extends Component {
           <h1 className="App-title">Create a New Person</h1>
         </header>
         <br/><br/>
-        <div className="formContainer">
+        {/* <GoogleLogin
+          clientId=" 886670645771-luv4ij7j6drkigljve5li66vu40fd6cp.apps.googleusercontent.com "
+          buttonText="Login"
+          onSuccess={ this.Google}
+          onFailure={ this.Google}
+          /> */}
+        <div className="formContainer">        
           <form onSubmit={this.handleSubmit}>
             <div className="form-group">
                 <label>Username</label>
@@ -69,8 +83,8 @@ class Login extends Component {
           </form>
         </div>
 
-        {this.state.submitted &&
-          <div>
+        {this.state.submitted && window.location.reload() && this.context.router.history.push("/") &&
+        <div>
             <h2>
               User Logged In
             </h2>

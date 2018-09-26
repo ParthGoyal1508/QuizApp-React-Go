@@ -94,7 +94,6 @@ class Signup extends Component {
             <h2>
               New Account Created!
             </h2>
-             This has been printed using conditional rendering.
           </div>
         }
         {!this.state.submitted &&
